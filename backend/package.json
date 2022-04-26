@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./dist/server.js",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc -p .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cliHelp": "nodemon --help options"
+  },
+  "author": "S.Skaugvoll",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "express": "^4.17.2",
+    "prom-client": "^14.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^14.14.10",
+    "nodemon": "^2.0.6",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.1.2"
+  }
+}

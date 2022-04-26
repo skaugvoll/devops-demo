@@ -1,0 +1,56 @@
+version: "3.8"
+services:
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/elastic-certificates.p12:/usr/share/elasticsearch/config/elastic-certificates.p12
+      - ./docker-data-volumes/elasticsearch:/usr/share/elasticsearch/data
+
+  kibana:
+    depends_on:
+      - elasticsearch  
+    build:
+      context: ./kibana
+      dockerfile: Dockerfile
+    ports:
+      - 5601:5601
+    volumes:
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./backend:/app
+  # grafana:
+  #   image: grafana/grafana
+  #   volumes:
+  #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
+  #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
+  #     ##  configure dashboard providers (import dashboards)
+  #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
+  #     ## copy over dashboard config
+  #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
+  #   # build:
+  #   #   context: ./grafana
+  #   #   dockerfile: Dockerfile
+  #   # volumes:
+  #   ports:
+  #     - 8080:3000
+  # prometheus:
+  #   image: prom/prometheus
+  #   # build:
+  #   #   context: ./prometheus
+  #   #   dockerfile: Dockerfile
+  #   ports:
+  #       - 9090:9090
+  #   volumes:
+  #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml

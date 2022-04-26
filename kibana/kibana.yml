@@ -1,0 +1,5 @@
+server.name: kibana
+server.host: "0.0.0.0" # instance should be accessible from all the IP addresses on the host machine if the host machine has more than one network interface.
+elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+elasticsearch.username: kibana
+elasticsearch.password: cqpgCa2WE2q2KK1AwYQO
