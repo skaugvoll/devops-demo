@@ -1,24 +1,22 @@
 import React from 'react';
 import logo from './logo.svg';
-import './App.css';
+
+import { Link, Outlet } from 'react-router-dom';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <nav>
+        <p>Navigation</p>
+        <ul style={{ textAlign: 'left' }}>
+          <li><Link to="/ok">200</Link></li>
+          <li><Link to="/ts-error">TS error</Link></li>
+          {/* <li><Link to="/js-error">JS error</Link></li>
+            <li><Link to="/backend-error">backend error</Link></li> */}
+        </ul>
+      </nav>
+
+      <Outlet />
     </div>
   );
 }

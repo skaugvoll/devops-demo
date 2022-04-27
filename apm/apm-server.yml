@@ -1,0 +1,211 @@
+######################### APM Server Configuration #########################
+
+################################ APM Server ################################
+
+apm-server:
+  # Defines the host and port the server is listening on. Use "unix:/path/to.sock" to listen on a unix domain socket.
+  host: "0.0.0.0:8200"
+
+  #---------------------------- APM Server - Secure Communication with Agents ----------------------------
+
+  #---------------------------- APM Server - RUM Real User Monitoring ----------------------------
+
+  # Enable Real User Monitoring (RUM) Support. By default RUM is disabled.
+  # RUM does not support token based authorization. Enabled RUM endpoints will not require any authorization
+  # token configured for other endpoints.
+  rum:
+    enabled: true
+
+    event_rate:
+      # Defines the maximum amount of events allowed to be sent to the APM Server RUM
+      # endpoint per IP per second. Defaults to 300.
+      limit: 300
+
+      # An LRU cache is used to keep a rate limit per IP for the most recently seen IPs.
+      # This setting defines the number of unique IPs that can be tracked in the cache.
+      # Sites with many concurrent clients should consider increasing this limit. Defaults to 1000.
+      lru_size: 1000
+
+    #-- General RUM settings
+
+    # A list of permitted origins for real user monitoring.
+    # User-agents will send an origin header that will be validated against this list.
+    # An origin is made of a protocol scheme, host and port, without the url path.
+    # Allowed origins in this setting can have * to match anything (eg.: http://*.example.com)
+    # If an item in the list is a single '*', everything will be allowed.
+    allow_origins: ["*"]
+
+    # A list of Access-Control-Allow-Headers to allow RUM requests, in addition to "Content-Type",
+    # "Content-Encoding", and "Accept"
+    allow_headers: ["*", "header1", "header2"]
+
+    # Custom HTTP headers to add to RUM responses, e.g. for security policy compliance.
+    #response_headers :
+    #  X-My-Header: Contents of the header
+
+    # Regexp to be matched against a stacktrace frame's `file_name` and `abs_path` attributes.
+    # If the regexp matches, the stacktrace frame is considered to be a library frame.
+    library_pattern: "node_modules|bower_components|~"
+
+    # Regexp to be matched against a stacktrace frame's `file_name`.
+    # If the regexp matches, the stacktrace frame is not used for calculating error groups.
+    # The default pattern excludes stacktrace frames that have a filename starting with '/webpack'
+    exclude_from_grouping: "^/webpack"
+
+    # If a source map has previously been uploaded, source mapping is automatically applied.
+    # to all error and transaction documents sent to the RUM endpoint.
+    source_mapping:
+      # Sourcemapping is enabled by default.
+      enabled: true
+
+      # Source maps are always fetched from Elasticsearch, by default using the output.elasticsearch configuration.
+      # A different instance must be configured when using any other output.
+      # This setting only affects sourcemap reads - the output determines where sourcemaps are written.
+      elasticsearch:
+        # Array of hosts to connect to.
+        # Scheme and port can be left out and will be set to the default (`http` and `9200`).
+        # In case you specify and additional path, the scheme is required: `http://localhost:9200/path`.
+        # IPv6 addresses should always be defined as: `https://[2001:db8::1]:9200`.
+        hosts: ["http://elasticsearch:9200"]
+
+        # Protocol - either `http` (default) or `https`.
+        #protocol: "https"
+
+        # Authentication credentials - either API key or username/password.
+        #api_key: "id:api_key"
+        #username: "elastic" # TODO: does this need to be enabled?
+        #password: "changeme" # TODO: does this need to be enabled?
+
+      # The `cache.expiration` determines how long a source map should be cached before fetching it again from Elasticsearch.
+      # Note that values configured without a time unit will be interpreted as seconds.
+      cache:
+        expiration: 5m
+
+      # Source maps are stored in a separate index.
+      # If the default index pattern for source maps at 'outputs.elasticsearch.indices'
+      # is changed, a matching index pattern needs to be specified here.
+      index_pattern: "apm-*-sourcemap*"
+
+  #---------------------------- APM Server - Agent Configuration ----------------------------
+
+  # When using APM agent configuration, information fetched from Kibana will be cached in memory for some time.
+  # Specify cache key expiration via this setting. Default is 30 seconds.
+  #agent.config.cache.expiration: 30s
+
+  kibana:
+    # For APM Agent configuration in Kibana, enabled must be true.
+    enabled: true
+
+    # Scheme and port can be left out and will be set to the default (`http` and `5601`).
+    # In case you specify an additional path, the scheme is required: `http://localhost:5601/path`.
+    # IPv6 addresses should always be defined as: `https://[2001:db8::1]:5601`.
+    host: "kibana:5601"
+
+    # Optional protocol and basic auth credentials.
+    #protocol: "https"
+    username: "apm_system"
+    password: "2QeOr5yVBBirtuIKVkLP" ######## CHANGE ME #########
+
+    # Optional HTTP path.
+    #path: ""
+
+    # Enable custom SSL settings. Set to false to ignore custom SSL settings for secure communication.
+    #ssl.enabled: true
+
+    # Optional SSL configuration options. SSL is off by default, change the `protocol` option if you want to enable `https`.
+    # Configure SSL verification mode. If `none` is configured, all server hosts
+    # and certificates will be accepted. In this mode, SSL based connections are
+    # susceptible to man-in-the-middle attacks. Use only for testing. Default is
+    # `full`.
+    #ssl.verification_mode: full
+
+    # List of supported/valid TLS versions. By default all TLS versions 1.0 up to
+    # 1.2 are enabled.
+    #ssl.supported_protocols: [TLSv1.0, TLSv1.1, TLSv1.2]
+
+    # List of root certificates for HTTPS server verifications.
+    #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+
+    # Certificate for SSL client authentication.
+    #ssl.certificate: "/etc/pki/client/cert.pem"
+
+    # Client Certificate Key
+    #ssl.key: "/etc/pki/client/cert.key"
+
+    # Optional passphrase for decrypting the Certificate Key.
+    # It is recommended to use the provided keystore instead of entering the passphrase in plain text.
+    #ssl.key_passphrase: ''
+
+    # Configure cipher suites to be used for SSL connections.
+    #ssl.cipher_suites: []
+
+    # Configure curve types for ECDHE based cipher suites.
+    #ssl.curve_types: []
+
+  #---------------------------- APM Server - ILM Index Lifecycle Management ----------------------------
+
+#-------------------------- Elasticsearch output --------------------------
+output.elasticsearch:
+  # Array of hosts to connect to.
+  # Scheme and port can be left out and will be set to the default (`http` and `9200`).
+  # In case you specify and additional path, the scheme is required: `http://localhost:9200/path`.
+  # IPv6 addresses should always be defined as: `https://[2001:db8::1]:9200`.
+  hosts: ["elasticsearch:9200"]
+
+  # Boolean flag to enable or disable the output module.
+  #enabled: true
+
+  # Set gzip compression level.
+  #compression_level: 0
+
+  # Protocol - either `http` (default) or `https`.
+  #protocol: "https"
+
+  # Authentication credentials - either API key or username/password.
+  #api_key: "id:api_key"
+  username: "elastic"
+  password: "lvx1yVEjiXGYXZyhTrEB" ########## CHANGE ME ########
+
+  #
+
+#----------------------------- Console output -----------------------------
+
+#---------------------------- Logstash output -----------------------------
+
+#============================= Instrumentation =============================
+
+#================================= Paths ==================================
+
+#================================= Logging =================================
+
+#=============================== HTTP Endpoint ===============================
+
+#============================= X-pack Monitoring =============================
+
+# APM server can export internal metrics to a central Elasticsearch monitoring
+# cluster.  This requires x-pack monitoring to be enabled in Elasticsearch.  The
+# reporting is disabled by default.
+
+# Set to true to enable the monitoring reporter.
+monitoring.enabled: false # TODO: enable
+
+# Most settings from the Elasticsearch output are accepted here as well.
+# Note that these settings should be configured to point to your Elasticsearch *monitoring* cluster.
+# Any setting that is not set is automatically inherited from the Elasticsearch
+# output configuration. This means that if you have the Elasticsearch output configured,
+# you can simply uncomment the following line.
+monitoring.elasticsearch:
+  # Protocol - either `http` (default) or `https`.
+  #protocol: "https"
+
+  # Authentication credentials - either API key or username/password.
+  #api_key: "id:api_key"
+  username: "elastic"
+  password: "lvx1yVEjiXGYXZyhTrEB" ###### CHANGE ME #######
+
+  # Array of hosts to connect to.
+  # Scheme and port can be left out and will be set to the default (`http` and `9200`).
+  # In case you specify and additional path, the scheme is required: `http://localhost:9200/path`.
+  # IPv6 addresses should always be defined as: `https://[2001:db8::1]:9200`.
+  #hosts: ["localhost:9200"] # TODO: change me to [ "elasticsearch:9200"]
+  hosts: ["elasticsearch:9200"]

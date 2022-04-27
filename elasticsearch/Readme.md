@@ -21,8 +21,9 @@
    - `xpack.security.transport.ssl.keystore.path: elastic-certificates.p12`
    - `xpack.security.transport.ssl.truststore.path: elastic-certificates.p12`
    - `xpack.security.transport.ssl.truststore.type: PKCS12`
-8. Configure data volume for elasticsearch
-   1. add to docker-compose.services[n].elasticsearch.volumes `- ./docker-data-volumes/elasticsearch:/usr/share/elasticsearch/data`
+8. Configure data volume for elasticsearch 
+   1. on root level of project (where docker-compose file is located), create folder(s) `docker-data-volumes/elasticsearch`
+   2. add to docker-compose.services[n].elasticsearch.volumes `- ./docker-data-volumes/elasticsearch:/usr/share/elasticsearch/data`
 9.  spin up elasticsearch and jump into the container
     1.  `bin/elasticsearch-setup-passwords auto`
     2.  Note down the credentials
