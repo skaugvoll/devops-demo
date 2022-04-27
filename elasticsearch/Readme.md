@@ -42,7 +42,7 @@
         7.  elastic
             1.  lvx1yVEjiXGYXZyhTrEB
 10. update kibana.yml
-    1.  elasticsearch.username: kibana
+    1.  elasticsearch.username: kibana_system
     2.  elasticsearch.password: <kibana password>
 11. Now we should be able to open localhost:9200
     1.  enter username:password elastic:<elastic password>
@@ -53,4 +53,10 @@
 
 >NB:
 >since we created the `docker-data-volume` and have a static `elastic-certificates.p12`, we can reuse the config next time we want to start from scratch, and skip all the steps above
+
+
+For Fleet to work we need a service token
+`~/bin/elasticsearch-service-tokens create <service_account_principal> <token_name>`
+e.g. run `~/bin/elasticsearch-service-tokens create elastic/fleet-server fleet-server-token`
+outputs: `AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci10b2tlbjpaX3habnJRdlM5R0liXzc3M05QYnhB`
 

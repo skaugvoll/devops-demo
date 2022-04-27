@@ -1,12 +1,14 @@
+# https://www.elastic.co/guide/en/elasticsearch/reference/8.1/security-basic-setup.html
+# https://www.elastic.co/guide/en/elasticsearch/reference/8.1/configuring-stack-security.html
 cluster.name: devops-demo-cluster
 network.host: 0.0.0.0
-xpack.security.enabled: true
-# xpack.security.enabled: false
-# xpack.security.authc.api_key.enabled: true
 discovery.type: single-node
-xpack.security.transport.ssl.enabled: true
-xpack.security.transport.ssl.keystore.type: PKCS12
-xpack.security.transport.ssl.verification_mode: certificate
-xpack.security.transport.ssl.keystore.path: elastic-certificates.p12
-xpack.security.transport.ssl.truststore.path: elastic-certificates.p12
-xpack.security.transport.ssl.truststore.type: PKCS12
+xpack.security.enabled: true
+xpack.security.authc.api_key.enabled: true
+# xpack.security.authc.api_key.enabled: true
+# xpack.security.transport.ssl.enabled: true
+# xpack.security.transport.ssl.keystore.type: PKCS12
+# xpack.security.transport.ssl.verification_mode: certificate
+# xpack.security.transport.ssl.keystore.path: elastic-certificates.p12
+# xpack.security.transport.ssl.truststore.path: elastic-certificates.p12
+# xpack.security.transport.ssl.truststore.type: PKCS12

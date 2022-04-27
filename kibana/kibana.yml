@@ -1,6 +1,20 @@
+# ------------------------------------------------ Default Kibana configuration for docker target ------------------------------------------------ #
 server.name: kibana
-server.host: "0.0.0.0" # instance should be accessible from all the IP addresses on the host machine if the host machine has more than one network interface.
+server.host: "0.0.0.0"
 elasticsearch.hosts: ["http://elasticsearch:9200"]
-elasticsearch.username: kibana
+
+# ------------------------------------------------ XPACK config ------------------------------------------------ #
+# xpack.security.enabled: true # default and does not exists in kibana > 8
+elasticsearch.username: kibana_system
 elasticsearch.password: cqpgCa2WE2q2KK1AwYQO
-# xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
+
+# elasticsearch.username: "kibana_system"
+# elasticsearch.password: "9CrzkNEsoARdS8bYZyQw" # TODO: remember to update this every time restart(rebuild) the elasticsearch container, as we need to re generate the password also
+
+xpack.security.encryptionKey: "something_at_least_32_characters" # optional?
+xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters" # optional ?
+# Kibana’s session expiration settings. Set both the idle timeout and lifespan settings:
+xpack.security.session.idleTimeout: "1h" # optional
+xpack.security.session.lifespan: "30d" # optional
+
+xpack.fleet.agents.enabled: true
