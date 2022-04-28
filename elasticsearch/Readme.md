@@ -1,4 +1,4 @@
-# Elasticsearch
+# Elasticsearch (outdated, use root readme)
 
 ## How to get started
 
