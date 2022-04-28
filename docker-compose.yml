@@ -47,7 +47,8 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.authc.api_key.enabled=true
-    # ----------------------------------------------
+      # - xpack.security.enabled=true
+      # ----------------------------------------------
   kibana:
     container_name: kibana
     depends_on:
@@ -65,7 +66,9 @@ services:
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: 'z4eJ=7EEqcQ*OHDd1J3R'
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-  # ----------------------------------------------
+      # xpack.security.enabled: 1
+      # xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
+      # ----------------------------------------------
   agent:
     container_name: agent
     restart: always
@@ -104,6 +107,7 @@ services:
     environment:
       FLEET_ENROLL: 1
       FLEET_URL: http://agent:8220
+      FLEET_SERVER_SERVICE_TOKEN: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2NTExNDI2NDQ2NjE6Ukgxb29FcVFTQ3lnNzBRWV9wbGZkZwsk
       FLEET_ENROLLMENT_TOKEN: am9URWI0QUJoTF9LUEljZHpqTTE6VVhyWW03UGdTektwOEZXSXVQb3RBQQ==
       FLEET_INSECURE: 1
     user: root

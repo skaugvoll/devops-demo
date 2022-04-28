@@ -5,6 +5,7 @@ const agent = apm;
 const apmAgentstart = () => {
     agent.start({
         serverUrl: 'http://apm:8200',
+        serviceName: 'backend',
         environment: 'local',
         centralConfig: false,
         logLevel: 'debug',
