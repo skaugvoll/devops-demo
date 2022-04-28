@@ -42,6 +42,7 @@ looks like we need another agent, that is not a fleet server.
 
 go to fleet, and then select enrollment tokens, and copy the one from Default Fleet Server policy
 update apm service to use this token
+we also need to set insecure http for fleet server (agent) and elastic agent (apm agent)
 
 docker-compose up
 
