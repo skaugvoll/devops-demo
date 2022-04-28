@@ -3,7 +3,7 @@
 cluster.name: devops-demo-cluster
 network.host: 0.0.0.0
 discovery.type: single-node
-xpack.security.enabled: true
+# xpack.security.enabled: true
 xpack.security.authc.api_key.enabled: true
 # xpack.security.authc.api_key.enabled: true
 # xpack.security.transport.ssl.enabled: true

@@ -8,4 +8,6 @@ https://discuss.elastic.co/t/fleet-server-installation-options/274261/4
 
 https://discuss.elastic.co/t/how-to-use-elastic-agent-docker-image/269183/2
 
+https://www.elastic.co/guide/en/fleet/current/agent-environment-variables.html
+
 TODO: Get Fleet and APM to work!
