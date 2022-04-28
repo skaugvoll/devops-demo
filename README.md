@@ -26,7 +26,27 @@ Repository holding demo about DevOps tools, such as ELK-stack, RUM, Grafana, Pro
 12. choose / click on default fleet server policy and add integration docker
     1.  add docker and save integration with the default settings. then save and deploy
 
+Next we need to set up Kibana APM
+https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html
 
+Next add APM integration to the policy we want it to use (Default Fleet policy in this example)
+Just go through and set host apm:8200 and url http://apm:8200
+
+Question: do we need to have a separate apm server ?
+I will first try to set up an apm server
+remember to change settings in apm config to have correct passwords! - I dont have them with the alpha versions being used
+
+then I'll try to send apm metrics to agent instead. did not work
+
+looks like we need another agent, that is not a fleet server.
+
+go to fleet, and then select enrollment tokens, and copy the one from Default Fleet Server policy
+update apm service to use this token
+
+docker-compose up
+
+
+comment in the apm (agent) service
 
 
 # TODO: add volume to kibana and agent so that we don't need to do all steps every time we start up, only first time
@@ -34,6 +54,7 @@ I've added some, so after dowing docker-compose down and up, same credentials an
 
 # Coming back,
 it should be just to docker-compose up
+if the fleet server has trouble, docker-compose down, comment out the service, start up es and kibana, then start the fleet service.
 
 # Troubleshoot
 if it does not work
