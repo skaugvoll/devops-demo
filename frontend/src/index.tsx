@@ -1,6 +1,7 @@
 import { init as initApm } from '@elastic/apm-rum'
 import App from './App';
 // import reportWebVitals from './reportWebVitals';
+
 import { render } from "react-dom";
 import { BrowserRouter as Router, Link, Switch } from "react-router-dom";
 import { ApmRoute } from '@elastic/apm-rum-react';
@@ -15,8 +16,11 @@ initApm({
 
   // Set custom APM Server URL (default: http://localhost:8200)
   serverUrl: 'http://localhost:8200',
+  // serverUrl: 'http://fleet:8200',
 
-  logLevel: 'debug',
+  logLevel: 'trace',
+  distributedTracing: true,
+  distributedTracingOrigins: ['http://backend:3001', 'http://localhost:3001']
 
   // Set service version (required for sourcemap feature)
   // serviceVersion: ''

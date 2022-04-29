@@ -13,6 +13,7 @@
   "author": "S.Skaugvoll",
   "license": "MIT",
   "dependencies": {
+    "@types/cors": "^2.8.12",
     "axios": "^0.21.0",
     "cors": "^2.8.5",
     "elastic-apm-node": "^3.31.0",

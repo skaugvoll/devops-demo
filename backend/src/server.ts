@@ -17,7 +17,13 @@ const HOST = process.env.HOST || 'localhost'
 const appRouter = express.Router();
 
 // Add CORS
-app.use(cors());
+app.use(cors(
+    {
+        origin: '*',
+        allowedHeaders: ['traceparent', "Access-Control-Request-Method", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers"]
+
+    }
+));
 
 // Add promethus setup & config as middleware,
 app.use(prometheus)
