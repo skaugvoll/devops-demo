@@ -1,4 +1,4 @@
-import react from "react";
+
 
 const PageOk = (props: any) => {
     return (

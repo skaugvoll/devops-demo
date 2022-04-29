@@ -84,28 +84,6 @@ services:
       # - agent:/usr/share/elastic-agent
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # ----------------------------------------------
-      # elastic-agent:
-      #   restart: unless-stopped
-      #   build:
-      #     context: ./fleet
-      #     dockerfile: Dockerfile
-      #   depends_on:
-      #     - fleet
-      #   environment:
-      #     - "FLEET_ENROLL=1"
-      #     - "FLEET_INSECURE=1"
-      #     - "FLEET_URL=http://fleet:8220"
-      #     - "STATE_PATH=/usr/share/elastic-agent"
-      #     - "ELASTICSEARCH_USERNAME=elastic"
-      #     - "ELASTICSEARCH_PASSWORD=lvx1yVEjiXGYXZyhTrEB"
-      #     - "KIBANA_USERNAME=kibana_system"
-      #     - "KIBANA_PASSWORD=cqpgCa2WE2q2KK1AwYQO"
-      #   # volumes:
-      #   #   - type: bind
-      #   #     source: ../tmp/service_logs/
-      #   #     target: /tmp/service_logs/
-
-      # ----------------------------------------------
       #### MONITORING STACK
       # grafana:
       #   image: grafana/grafana

@@ -1,22 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
+// import { ApmRoute } from '@elastic/apm-rum-react';
+// import PageOk from './routes/page_ok/page_ok';
+// import PageTSError from './routes/page_ts_error/page_ts_error';
+// import { Link, Route } from "react-router-dom"
 
-import { Link, Outlet } from 'react-router-dom';
+/* Home component */
+// const Home = () => (
+//   <div>
+//     <h2>Home</h2>
+//   </div>
+// );
+
+// /* Category component */
+// const Category = () => (
+//   <div>
+//     <h2>Category</h2>
+//   </div>
+// );
+
+// /* Products component */
+// const Products = () => (
+//   <div>
+//     <h2>Products</h2>
+//   </div>
+// );
+
 
 function App() {
   return (
-    <div className="App">
-      <nav>
-        <p>Navigation</p>
-        <ul style={{ textAlign: 'left' }}>
-          <li><Link to="/ok">200</Link></li>
-          <li><Link to="/ts-error">TS error</Link></li>
-          {/* <li><Link to="/js-error">JS error</Link></li>
-            <li><Link to="/backend-error">backend error</Link></li> */}
-        </ul>
-      </nav>
-
-      <Outlet />
+    <div>
+      <div>
+        <h1>Welcome</h1>
+      </div>
     </div>
   );
 }

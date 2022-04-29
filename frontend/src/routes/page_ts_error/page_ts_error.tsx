@@ -1,3 +1,4 @@
+import { withRouter } from "react-router-dom";
 
 
 const PageTSError = (props: any) => {
@@ -8,4 +9,4 @@ const PageTSError = (props: any) => {
     );
 }
 
-export default PageTSError;
+export default withRouter(PageTSError);
