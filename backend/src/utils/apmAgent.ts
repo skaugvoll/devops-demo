@@ -4,10 +4,10 @@ const agent = apm;
 
 const apmAgentstart = () => {
     agent.start({
-        serverUrl: 'http://apm:8200',
+        serverUrl: 'http://fleet:8200',
         environment: 'local',
         centralConfig: false,
-        logLevel: 'debug',
+        logLevel: 'trace',
         transactionSampleRate: 0.5
     });
 }

@@ -1,14 +1,14 @@
-import apm from "elastic-apm-node";
+import apmAgentStart from "./utils/apmAgent";
+// Needs to be the first thing in this file
+apmAgentStart();
+
 import express from "express";
 import cors from "cors";
 import { numberOfRequestCounter } from "./middleware/prometheus/counters";
 import { requestDuration } from "./middleware/prometheus/histogram";
 import prometheus from "./middleware/prometheus/prometheus";
-import apmAgentStart from "./utils/apmAgent";
 import { waitFor } from "./utils/waitFor";
 
-// Needs to be the first thing in this file
-apmAgentStart();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
