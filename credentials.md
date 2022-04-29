@@ -18,9 +18,9 @@
 
 -----------------------------------------------------------------
 
-Password for the elastic user is: FU0jTQMS*QnMh28UQdHv
+Password for the elastic user is: 4GzaJzAdePhACJ4W-bLY
 
-Password for the kibana_system user is: z4eJ=7EEqcQ*OHDd1J3R
+Password for the kibana_system user is: O-6GWk6Ws1eQf-ZRu-b9
 
 Please note these down as they will not be shown again.
 
