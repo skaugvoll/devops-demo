@@ -1,4 +1,3 @@
-import { withTransaction } from "@elastic/apm-rum-react";
 import { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 
@@ -10,7 +9,7 @@ interface BackendIndexResponse {
 const PageOk = (props: any) => {
     const [state, updateState] = useState<BackendIndexResponse[]>([]);
     useEffect(() => {
-        const url = 'http://localhost:3001/';
+        const url = 'http://localhost:3000/'; // this is browser to server, thus localhost
         const fetchData = async () => {
             try {
                 const response = await fetch(url);

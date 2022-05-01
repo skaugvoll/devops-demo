@@ -14,7 +14,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - 8080:3000
     volumes:
       - ./frontend:/app
   # ----------------------------------------------
@@ -23,11 +23,20 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - 3001:3000
+      - 3000:3000
     volumes:
       - ./backend:/app
   # ----------------------------------------------
-  #### ELK STACK
+  backendtwo:
+    build:
+      context: ./backend_2
+      dockerfile: Dockerfile
+    ports:
+      - 4000:3000
+    volumes:
+      - ./backend_2:/app
+      # ----------------------------------------------
+      #### ELK STACK
   elasticsearch:
     build:
       context: ./elasticsearch
@@ -44,7 +53,7 @@ services:
       - discovery.type=single-node
       - xpack.security.authc.api_key.enabled=true
       - xpack.security.enabled=true
-      # ----------------------------------------------
+  # ----------------------------------------------
   kibana:
     depends_on:
       - elasticsearch
@@ -61,7 +70,7 @@ services:
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
       xpack.security.enabled: 1
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
-  # ----------------------------------------------
+      # ----------------------------------------------
   fleet:
     restart: always
     build:
@@ -84,31 +93,31 @@ services:
     volumes:
       - fleet:/usr/share/elastic-agent
       - /var/run/docker.sock:/var/run/docker.sock:ro
-  # ----------------------------------------------
-  #### MONITORING STACK
-  # grafana:
-  #   image: grafana/grafana
-  #   volumes:
-  #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
-  #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
-  #     ##  configure dashboard providers (import dashboards)
-  #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
-  #     ## copy over dashboard config
-  #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
-  #   # build:
-  #   #   context: ./grafana
-  #   #   dockerfile: Dockerfile
-  #   # volumes:
-  #   ports:
-  #     - 8080:3000
-  # ----------------------------------------------
-  # prometheus:
-  #   image: prom/prometheus
-  #   # build:
-  #   #   context: ./prometheus
-  #   #   dockerfile: Dockerfile
-  #   ports:
-  #       - 9090:9090
-  #   volumes:
-  #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml
-  # ----------------------------------------------
+      # ----------------------------------------------
+      #### MONITORING STACK
+      # grafana:
+      #   image: grafana/grafana
+      #   volumes:
+      #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
+      #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
+      #     ##  configure dashboard providers (import dashboards)
+      #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
+      #     ## copy over dashboard config
+      #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
+      #   # build:
+      #   #   context: ./grafana
+      #   #   dockerfile: Dockerfile
+      #   # volumes:
+      #   ports:
+      #     - 8080:3000
+      # ----------------------------------------------
+      # prometheus:
+      #   image: prom/prometheus
+      #   # build:
+      #   #   context: ./prometheus
+      #   #   dockerfile: Dockerfile
+      #   ports:
+      #       - 9090:9090
+      #   volumes:
+      #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml
+      # ----------------------------------------------

@@ -7,9 +7,8 @@ import cors from "cors";
 import { numberOfRequestCounter } from "./middleware/prometheus/counters";
 import { requestDuration } from "./middleware/prometheus/histogram";
 import prometheus from "./middleware/prometheus/prometheus";
-import { waitFor } from "./utils/waitFor";
-import axios from "axios";
 import morgan from "morgan";
+
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -20,12 +19,6 @@ morgan.token('corrlealationLog', () => {
     return `| transaction.id = ${logCorrelationIds["transaction.id"]} trace.id = ${logCorrelationIds["trace.id"]} span.id = ${logCorrelationIds["span.id"] ?? 'None'} |`
 })
 
-app.use(
-    morgan(
-        ':method :url :status :res[content-length] :corrlealationLog :response-time ms'
-    )
-)
-
 const appRouter = express.Router();
 
 // Add CORS
@@ -33,11 +26,14 @@ appRouter.use(cors(
     {
         origin: '*',
         allowedHeaders: ['traceparent', "Access-Control-Request-Method", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers"]
-
     }
 ));
 
-// app.use(cors());
+app.use(
+    morgan(
+        ':method :url :status :res[content-length] :corrlealationLog :response-time ms'
+    )
+)
 
 // Add promethus setup & config as middleware,
 appRouter.use(prometheus)
@@ -54,6 +50,7 @@ appRouter.all('*', async (req, res, next) => {
         // observe route timeing
         const statusLabel = res.statusCode;
         const methodLabel = req.method
+        console.log('observing request duration: ', endOperation);
         requestDuration.labels(`${statusLabel}`, `${methodLabel}`).observe(endOperation)
     })
     // execute target/route handler
@@ -78,44 +75,22 @@ appRouter.get("/", (req, res) => {
     res.json(routes);
 })
 
+appRouter.get('/data', (req, res) => {
 
-// add route to simulate processing
-appRouter.get('/delay/:sec', async (req, res) => {
-    const { sec } = req.params;
-    const ms_unit = 1000;
-    try {
-        console.log('Waiting for...');
-        await waitFor(Number(sec) * ms_unit);
-        console.log('Done waiting returning 200');
-        res.sendStatus(200);
-    }
-    catch (e) {
-        res.sendStatus(500);
-    }
+    const data = [{
+        firstName: 'Test',
+        lastName: 'Testersen'
+    },
+    {
+        firstName: 'Mr/s',
+        lastName: 'Manager'
+    }]
+    return res.send(data);
 })
 
-appRouter.get('/data', async (req, res) => {
-    console.log("Server 1 <data>: hey there");
-    try {
-        const r = await axios.get('http://backendtwo:3000/data') // use container port, not exposed on host
-        const d = r.data;
-        res.send(d);
-    } catch (e) {
-        console.log("ERROR: ", JSON.stringify(e, null, 2), e)
-        res.sendStatus(500);
-    }
-})
-
-appRouter.get('/data-error', async (req, res) => {
-    try {
-        const r = await axios.get('http://backentwo:3000/data-error'); // use continer port, not exposed on host
-        const d = r.data;
-        console.log("this should never happen");
-        res.send(d);
-    } catch (e) {
-        console.warn("Server 1 return status 400, fetching from backendtwo")
-        res.sendStatus(400);
-    }
+appRouter.get('/data-error', (req, res) => {
+    console.error("Server 2, this messages should appear, as this endpoint failes every time!")
+    return Error('Could not return any data');
 })
 
 app.use("/", appRouter);
