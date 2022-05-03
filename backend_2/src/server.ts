@@ -71,7 +71,7 @@ appRouter.get("/", (req, res) => {
             });
         }
     });
-
+    console.log("<server 2>: returning /")
     res.json(routes);
 })
 
@@ -85,11 +85,12 @@ appRouter.get('/data', (req, res) => {
         firstName: 'Mr/s',
         lastName: 'Manager'
     }]
+    console.log("<server 2>: returning /data")
     return res.send(data);
 })
 
 appRouter.get('/data-error', (req, res) => {
-    console.error("Server 2, this messages should appear, as this endpoint failes every time!")
+    console.error("<Server 2>, this messages should appear, as this endpoint failes every time!")
     return Error('Could not return any data');
 })
 

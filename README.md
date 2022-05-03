@@ -24,17 +24,52 @@ Repository holding demo about DevOps tools, such as ELK-stack, RUM, Grafana, Pro
 12. choose / click on default fleet server policy and add integration docker
     1.  add docker and save integration with the default settings. then save and deploy
 
-Next we need to set up Kibana APM
+13. Next we need to set up Kibana APM
 https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html
 
-Next add APM integration to the policy we want it to use (Default Fleet policy in this example)
-Just go through and set host fleet:8200 and url http://fleet:8200
+14. Next add APM integration to the policy we want it to use (Default Fleet policy in this example)
+    1.  Just go through and set host fleet:8200 and url http://fleet:8200
+    2.  Question: do we need to have a separate apm server ? - NO we do not
+    3.  then I'll try to send apm metrics to fleet instance instead. did work, just remember to open port 8200:8200
+    4.  Now the applications with language-apm-agents can use http://fleet:8200 to send metrics
 
-Question: do we need to have a separate apm server ? - NO we do not
+15. instrument applications to send data to fleet:8200
+    1.  remember to fix CORS and add additional headers for distributed tracing for rum
 
-then I'll try to send apm metrics to fleet instance instead. did work, just remember to open port 8200:8200
+16. Log correlation
+    1.  add morgan, and create the correct log format including apm trace ids for log correlation
 
-Now the applications with language-apm-agents can use http://fleet:8200 to send metrics
+17.  Set up filebeat
+     1.   Logstash is heavy to run
+     2.   filebeat could be a good option
+
+>First filebeat to retrive logs, then send them to logstash for parsing, then logstash sends them to elasticsearch ingest
+>pipeline that we need to set up, before elastic ingest logs into wanted index
+
+>NB: remember to update filebeat.yml and docker-compose.yml to have updated username and password for elastic account
+
+18. Set up logstash
+    1.  https://www.elastic.co/guide/en/logstash/current/ls-security.html 
+    We also need to create a few `new` `roles` and `users` to allow logstash to send data to elasticsearch. `For this we need elasticsearch and kibana to be running`
+
+
+
+
+> NB: I think we have to create the ingest pipeline either through elastic api or kibana ui, there are no way to create it on startup
+
+**!!BEFORE STARTING filebeat and logstash, start up es, kibana, apm**
+then in kibana, go to stack management, indgest pipelines, create pipeline
+give it a name (this name must match the pipeline in filebeat output.elsticsearch.pipeline) config. I use `log-correlation`
+Add processor type `grok`
+For the values / configuration of the processor, see filebeat/modules/elasticsearch/log-correlation.yml
+then click add.
+
+Now we need to set up the logstash users and roles
+
+kibana > stack management > roles
+follow: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+
+
 
 
 # TODO: add volume to kibana and agent so that we don't need to do all steps every time we start up, only first time
@@ -45,8 +80,5 @@ it should be just to docker-compose up
 if the fleet server has trouble, docker-compose down, comment out the service, start up es and kibana, then start the fleet service.
 
 # Troubleshoot
-if it does not work
-delete network
-delete volumes
-
-start from scratch and follow steps above
+if it does not work; delete network && delete volumes (docker volume rm .... && docker network rm ...)
+then; start from scratch and follow steps above

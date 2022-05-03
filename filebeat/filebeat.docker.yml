@@ -1,0 +1,59 @@
+name: filebeat-docker-log-correlation
+
+filebeat.config: # Not entirely sure what this does
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+#
+# MODULES
+# configuring modules, add file <modules>.yml in the modules.d directory, and map/volume it into the filebeat server
+#
+
+# filebeat.inputs:
+#   - type: container
+#     stream: all # both stdout & stderr
+#     paths:
+#       - /var/lib/docker/containers/*/*.log
+#     # pipeline: logcorrelation
+
+filebeat.autodiscover: # we do not need this, as we say read from all containers ?
+  providers:
+    - type: docker
+      # hints.enabled: true
+      templates:
+        - condition:
+            contains:
+              docker.container.labels.logcapture: "true"
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+
+processors:
+  # The following example enriches each event with the machine's local time zone
+  # offset from UTC.
+  - add_locale:
+      format: abbreviation
+  # The following example enriches each event with host metadata.
+  - add_host_metadata: ~
+  - add_docker_metadata: ~
+
+# setup.kibana: # to use our pre-built Kibana dashboards
+#   host: "http://kibana:5601"
+#   username: elastic # should maybe be kibana_system user ?
+#   password: WEct71W1PI1ufyVTd7NH
+
+# output.elasticsearch:
+#   hosts: http://elasticsearch:9200
+#   username: elastic
+#   password: WEct71W1PI1ufyVTd7NH
+
+# Output to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+
+# Defines if the HTTP endpoint is enabled.
+http.enabled: true
+http.host: 0.0.0.0
+http.port: 5066

@@ -4,39 +4,46 @@ volumes:
   search:
   kibana:
   fleet:
+  filebeat:
 
 
 services:
   #### APPS
   # ----------------------------------------------
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - 8080:3000
-    volumes:
-      - ./frontend:/app
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   labels:
+  #     logcapture: 'true'
+  #   ports:
+  #     - 8080:3000
+  #   volumes:
+  #     - ./frontend:/app
   # ----------------------------------------------
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      labels:
+        logcapture: 'true'
     ports:
       - 3000:3000
     volumes:
       - ./backend:/app
-  # ----------------------------------------------
+      # ----------------------------------------------
   backendtwo:
     build:
       context: ./backend_2
       dockerfile: Dockerfile
+    labels:
+      logcapture: 'true'
     ports:
       - 4000:3000
     volumes:
       - ./backend_2:/app
-      # ----------------------------------------------
-      #### ELK STACK
+  # ----------------------------------------------
+  #### ELK STACK
   elasticsearch:
     build:
       context: ./elasticsearch
@@ -71,53 +78,99 @@ services:
       xpack.security.enabled: 1
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
       # ----------------------------------------------
-  fleet:
-    restart: always
+      # fleet:
+      #   restart: always
+      #   build:
+      #     context: ./fleet
+      #     dockerfile: Dockerfile
+      #   ports:
+      #     - 8220:8220
+      #     - 8200:8200
+      #   depends_on:
+      #     - elasticsearch
+      #     - kibana
+      #   environment:
+      #     FLEET_SERVER_ENABLE: 1
+      #     FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
+      #     FLEET_SERVER_SERVICE_TOKEN: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2NTEyMjc4MDc0NTc6QnFjMXNVc3dTQldCYnZzeEdPbUhmUQ
+      #     FLEET_SERVER_INSECURE_HTTP: 1
+      #     FLEET_SERVER_POLICY_NAME: fleet-server-policy
+      #     FLEET_INSECURE: 1
+      #   user: root
+      #   volumes:
+      #     - fleet:/usr/share/elastic-agent
+      #     - /var/run/docker.sock:/var/run/docker.sock:ro
+      # ----------------------------------------------
+  filebeat:
+    # https://www.elastic.co/guide/en/apm/guide/8.1/log-correlation.html#_enable_log_correlation
+    # https://www.elastic.co/guide/en/beats/filebeat/8.1/configuring-ingest-node.html
+    # https://www.elastic.co/guide/en/beats/filebeat/8.1/filebeat-module-logstash.html
+    # elastic.co/guide/en/beats/filebeat/8.1/configuring-ingest-node.html
     build:
-      context: ./fleet
+      context: ./filebeat
       dockerfile: Dockerfile
-    ports:
-      - 8220:8220
-      - 8200:8200
     depends_on:
-      - elasticsearch
       - kibana
-    environment:
-      FLEET_SERVER_ENABLE: 1
-      FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
-      FLEET_SERVER_SERVICE_TOKEN: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2NTEyMjc4MDc0NTc6QnFjMXNVc3dTQldCYnZzeEdPbUhmUQ
-      FLEET_SERVER_INSECURE_HTTP: 1
-      FLEET_SERVER_POLICY_NAME: fleet-server-policy
-      FLEET_INSECURE: 1
+    command: --strict.perms=false
+      # --strict.perms=false -> ignore ownership of files, as we run as root
+      # - --pipeline # run the setup command with the --pipelines option specified
     user: root
     volumes:
-      - fleet:/usr/share/elastic-agent
+      # - filebeat:/usr/share/filebeat/data 
+      # This is needed for filebeat to load container log path as specified in filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # ----------------------------------------------
-      #### MONITORING STACK
-      # grafana:
-      #   image: grafana/grafana
-      #   volumes:
-      #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
-      #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
-      #     ##  configure dashboard providers (import dashboards)
-      #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
-      #     ## copy over dashboard config
-      #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
-      #   # build:
-      #   #   context: ./grafana
-      #   #   dockerfile: Dockerfile
-      #   # volumes:
-      #   ports:
-      #     - 8080:3000
-      # ----------------------------------------------
-      # prometheus:
-      #   image: prom/prometheus
-      #   # build:
-      #   #   context: ./prometheus
-      #   #   dockerfile: Dockerfile
-      #   ports:
-      #       - 9090:9090
-      #   volumes:
-      #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml
-      # ----------------------------------------------
+      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro
+      # https://discuss.elastic.co/t/how-to-correlate-container-logs-with-apm-in-django/283157
+      # https://github.com/elastic/beats/blob/master/filebeat/module/elasticsearch/server/ingest/pipeline.yml
+      # - ./filebeat/module/elasticsearch/log-correlation.yml:/usr/share/filebeat/module/elasticsearch/server/ingest/log-correlation.yml # did not work, maybe need to run filebeat -e setup --pipeline
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - KIBANA_HOST=http://kibana:5601
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=WEct71W1PI1ufyVTd7NH
+  # ----------------------------------------------
+  logstash:
+    build:
+      context: ./logstash
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    environment:
+      ELASTIC_USERNAME: elastic
+      ELASTIC_PASSWORD: WEct71W1PI1ufyVTd7NH
+      ELASTICSEARCH_HOST_PORT: http://elasticsearch:9200
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+  # ----------------------------------------------
+  #### MONITORING STACK
+  # grafana:
+  #   image: grafana/grafana
+  #   volumes:
+  #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
+  #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
+  #     ##  configure dashboard providers (import dashboards)
+  #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
+  #     ## copy over dashboard config
+  #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
+  #   # build:
+  #   #   context: ./grafana
+  #   #   dockerfile: Dockerfile
+  #   # volumes:
+  #   ports:
+  #     - 8080:3000
+  # ----------------------------------------------
+  # prometheus:
+  #   image: prom/prometheus
+  #   # build:
+  #   #   context: ./prometheus
+  #   #   dockerfile: Dockerfile
+  #   ports:
+  #       - 9090:9090
+  #   volumes:
+  #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml
+  # ----------------------------------------------

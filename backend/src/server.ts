@@ -74,7 +74,7 @@ appRouter.get("/", (req, res) => {
             });
         }
     });
-
+    console.log("<server 1>: returning /")
     res.json(routes);
 })
 
@@ -87,9 +87,11 @@ appRouter.get('/delay/:sec', async (req, res) => {
         console.log('Waiting for...');
         await waitFor(Number(sec) * ms_unit);
         console.log('Done waiting returning 200');
+        console.log("<server 1>: returning /delay:sec")
         res.sendStatus(200);
     }
     catch (e) {
+        console.error("<server 1>: returning error on /delay/:sec")
         res.sendStatus(500);
     }
 })
@@ -99,9 +101,10 @@ appRouter.get('/data', async (req, res) => {
     try {
         const r = await axios.get('http://backendtwo:3000/data') // use container port, not exposed on host
         const d = r.data;
+        console.log("<server 1>: returning /data")
         res.send(d);
     } catch (e) {
-        console.log("ERROR: ", JSON.stringify(e, null, 2), e)
+        console.error("<server 1> ERROR: ", JSON.stringify(e, null, 2), e)
         res.sendStatus(500);
     }
 })
@@ -110,10 +113,10 @@ appRouter.get('/data-error', async (req, res) => {
     try {
         const r = await axios.get('http://backentwo:3000/data-error'); // use continer port, not exposed on host
         const d = r.data;
-        console.log("this should never happen");
+        console.log("<server 1> : this should never happen");
         res.send(d);
     } catch (e) {
-        console.warn("Server 1 return status 400, fetching from backendtwo")
+        console.warn("<server 1> return status 400, fetching from backendtwo")
         res.sendStatus(400);
     }
 })
