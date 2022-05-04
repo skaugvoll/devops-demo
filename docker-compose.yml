@@ -131,6 +131,9 @@ services:
       - ELASTICSEARCH_PASSWORD=WEct71W1PI1ufyVTd7NH
   # ----------------------------------------------
   logstash:
+    depends_on:
+      - elasticsearch
+      - kibana
     build:
       context: ./logstash
       dockerfile: Dockerfile

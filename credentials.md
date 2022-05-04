@@ -13,7 +13,7 @@
 7.  elastic
     1.  lvx1yVEjiXGYXZyhTrEB -->
 
-
+================================================================================
 
 Changed password for user apm_system
 PASSWORD apm_system = qWPdLqyeOjPGjc2Y0ieF
@@ -35,3 +35,44 @@ PASSWORD remote_monitoring_user = Ik7ZOFspKMJsqXEeHqOG
 
 Changed password for user elastic
 PASSWORD elastic = WEct71W1PI1ufyVTd7NH
+
+
+================================================================================
+
+
+```
+POST _security/role/logstash_writer
+{
+  "cluster": ["manage_index_templates", "monitor", "manage_ilm"], 
+  "indices": [
+    {
+      "names": [ "logstash-*" ], 
+      "privileges": ["write","create","create_index","manage","manage_ilm"]  
+    }
+  ]
+}
+```
+
+```
+{
+  "role" : {
+    "created" : true
+  }
+}
+```
+
+```
+POST _security/user/logstash_internal
+{
+  "password" : "x-pack-test-password",
+  "roles" : [ "logstash_writer"],
+  "full_name" : "Internal Logstash User"
+}
+```
+
+```
+{
+  "created" : true
+}
+```
+
