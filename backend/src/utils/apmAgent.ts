@@ -14,5 +14,6 @@ const apmAgentstart = () => {
     return agent;
 }
 
+export const getAgent = () => agent;
 
 export default apmAgentstart;

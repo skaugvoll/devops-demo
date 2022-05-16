@@ -1,4 +1,4 @@
-import apmAgentStart from "./utils/apmAgent";
+import apmAgentStart, { getAgent } from "./utils/apmAgent";
 // Needs to be the first thing in this file
 const agent = apmAgentStart();
 
@@ -10,14 +10,20 @@ import prometheus from "./middleware/prometheus/prometheus";
 import { waitFor } from "./utils/waitFor";
 import axios from "axios";
 import morgan from "morgan";
+import Logger from "./utils/logger";
+import { logger } from "elastic-apm-node";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0'
 
+export const createAPMTraceLogFormat = (ids: typeof agent.currentTraceIds) => {
+    return `| transaction.id = ${ids["transaction.id"]} trace.id = ${ids["trace.id"]} span.id = ${ids["span.id"] ?? 'None'} |`
+}
+
 morgan.token('corrlealationLog', () => {
     const logCorrelationIds = agent.currentTraceIds;
-    return `| transaction.id = ${logCorrelationIds["transaction.id"]} trace.id = ${logCorrelationIds["trace.id"]} span.id = ${logCorrelationIds["span.id"] ?? 'None'} |`
+    return createAPMTraceLogFormat(logCorrelationIds);
 })
 
 app.use(
@@ -47,6 +53,14 @@ appRouter.all('*', async (req, res, next) => {
     // increment number of requests metric   
     numberOfRequestCounter.inc();
     const startOperation = new Date();
+
+    // add user context to APM
+    agent.setUserContext({
+        id: 1,
+        username: "test",
+        email: 'test@testersen.no'
+    })
+
 
     // add afterware on all requests
     res.on('finish', () => {
@@ -84,40 +98,60 @@ appRouter.get('/delay/:sec', async (req, res) => {
     const { sec } = req.params;
     const ms_unit = 1000;
     try {
-        console.log('Waiting for...');
+        Logger.info('Waiting for...');
         await waitFor(Number(sec) * ms_unit);
-        console.log('Done waiting returning 200');
-        console.log("<server 1>: returning /delay:sec")
+        Logger.info('Done waiting returning 200');
+        Logger.info("<server 1>: returning /delay:sec")
         res.sendStatus(200);
     }
     catch (e) {
-        console.error("<server 1>: returning error on /delay/:sec")
+        Logger.error("<server 1>: returning error on /delay/:sec")
         res.sendStatus(500);
     }
 })
 
 appRouter.get('/data', async (req, res) => {
-    console.log("Server 1 <data>: hey there");
+    Logger.info("Server 1 <data>: hey there");
+    const apmAgent = getAgent();
     try {
         const r = await axios.get('http://backendtwo:3000/data') // use container port, not exposed on host
         const d = r.data;
-        console.log("<server 1>: returning /data")
+        Logger.info(`<server 1>: returning /data`)
         res.send(d);
     } catch (e) {
-        console.error("<server 1> ERROR: ", JSON.stringify(e, null, 2), e)
+        Logger.error("<server 1> ERROR: ", JSON.stringify(e, null, 2))
+        agent.captureError(e, {
+            custom: {
+                type: 'request',
+                src: 'backend_1',
+                dest: 'backend_2'
+            }
+        })
         res.sendStatus(500);
     }
 })
 
 appRouter.get('/data-error', async (req, res) => {
     try {
-        const r = await axios.get('http://backentwo:3000/data-error'); // use continer port, not exposed on host
+        // return await axios.get('http://backentwo:3000/data-error'); // use continer port, not exposed on host
+        const r = await axios.get('http://backendtwo:3000/data-error'); // use continer port, not exposed on host
         const d = r.data;
-        console.log("<server 1> : this should never happen");
-        res.send(d);
+        Logger.info("<server 1> : this should never happen");
+        // res.send(d);
+        return r;
     } catch (e) {
-        console.warn("<server 1> return status 400, fetching from backendtwo")
-        res.sendStatus(400);
+        Logger.warn("<server 1> /data-error catch clause because backendtwo failed, as expected")
+        agent.captureError(e, {
+            custom: {
+                type: 'request',
+                src: 'Backend_1',
+                dest: 'Backend_2',
+                msg: 'Backend_2 Failed, so this endpnt returns error, and is marked as faulty'
+            }
+        },
+            () => res.sendStatus(200)
+        )
+
     }
 })
 
@@ -125,5 +159,5 @@ app.use("/", appRouter);
 
 // start application
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server started @ ${HOST}:${PORT}`)
+    Logger.http(`Server started @${HOST}:${PORT} `)
 })

@@ -8,6 +8,8 @@ import { numberOfRequestCounter } from "./middleware/prometheus/counters";
 import { requestDuration } from "./middleware/prometheus/histogram";
 import prometheus from "./middleware/prometheus/prometheus";
 import morgan from "morgan";
+import { cursorTo } from "readline";
+import apm from "elastic-apm-node";
 
 
 const app = express();
@@ -89,9 +91,31 @@ appRouter.get('/data', (req, res) => {
     return res.send(data);
 })
 
+const summation = (...numbers: number[]) => {
+    // const add = (...a: number[]) => {
+    const res = numbers.reduce((acc, cur) => {
+        return acc += cur;
+    })
+    // }
+    if (res != 2) {
+        throw new Error("Error in summation");
+
+    }
+    return res;
+    // return add(numbers)
+}
+
 appRouter.get('/data-error', (req, res) => {
-    console.error("<Server 2>, this messages should appear, as this endpoint failes every time!")
-    return Error('Could not return any data');
+    try {
+        const result = summation(1, 2, 3)
+        res.send(result);
+    } catch (e) {
+        agent.captureError(e)
+        res.sendStatus(500);
+    }
+    // return result;
+    // console.error("<Server 2>, this messages should appear, as this endpoint failes every time!")
+    // throw new Error('Could not return any data');
 })
 
 app.use("/", appRouter);
