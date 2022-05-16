@@ -50,11 +50,14 @@ processors:
 # output.elasticsearch:
 #   hosts: http://elasticsearch:9200
 #   username: elastic
-#   password: WEct71W1PI1ufyVTd7NH
+#   password: GITVBLBXAWCsB3WxN8s7
 
 # Output to Logstash
 output.logstash:
   hosts: ["logstash:5044"]
+
+# output.console:
+#   pretty: true
 
 # Defines if the HTTP endpoint is enabled.
 http.enabled: true

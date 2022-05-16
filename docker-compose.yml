@@ -10,18 +10,24 @@ volumes:
 services:
   #### APPS
   # ----------------------------------------------
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   labels:
-  #     logcapture: 'true'
-  #   ports:
-  #     - 8080:3000
-  #   volumes:
-  #     - ./frontend:/app
+  frontend:
+    container_name: "Frontend"
+    depends_on:
+      - fleet
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    labels:
+      logcapture: 'true'
+    ports:
+      - 8080:3000
+    volumes:
+      - ./frontend:/app
   # ----------------------------------------------
   backend:
+    container_name: Backend_1
+    depends_on:
+      - fleet
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -31,8 +37,11 @@ services:
       - 3000:3000
     volumes:
       - ./backend:/app
-      # ----------------------------------------------
+  # ----------------------------------------------
   backendtwo:
+    container_name: Backend_2
+    depends_on:
+      - fleet
     build:
       context: ./backend_2
       dockerfile: Dockerfile
@@ -45,6 +54,7 @@ services:
   # ----------------------------------------------
   #### ELK STACK
   elasticsearch:
+    container_name: Elasticsearch
     build:
       context: ./elasticsearch
       dockerfile: Dockerfile
@@ -60,8 +70,9 @@ services:
       - discovery.type=single-node
       - xpack.security.authc.api_key.enabled=true
       - xpack.security.enabled=true
-  # ----------------------------------------------
+      # ----------------------------------------------
   kibana:
+    container_name: Kibana
     depends_on:
       - elasticsearch
     build:
@@ -73,35 +84,37 @@ services:
       - kibana:/usr/share/kibana/data
     environment:
       ELASTICSEARCH_USERNAME: kibana_system
-      ELASTICSEARCH_PASSWORD: aLao9KQwI12aFlMiIdhc
+      ELASTICSEARCH_PASSWORD: SXNmk5kIEPM8q5lg8DFB # kibana user password
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
       xpack.security.enabled: 1
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
-      # ----------------------------------------------
-      # fleet:
-      #   restart: always
-      #   build:
-      #     context: ./fleet
-      #     dockerfile: Dockerfile
-      #   ports:
-      #     - 8220:8220
-      #     - 8200:8200
-      #   depends_on:
-      #     - elasticsearch
-      #     - kibana
-      #   environment:
-      #     FLEET_SERVER_ENABLE: 1
-      #     FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
-      #     FLEET_SERVER_SERVICE_TOKEN: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2NTEyMjc4MDc0NTc6QnFjMXNVc3dTQldCYnZzeEdPbUhmUQ
-      #     FLEET_SERVER_INSECURE_HTTP: 1
-      #     FLEET_SERVER_POLICY_NAME: fleet-server-policy
-      #     FLEET_INSECURE: 1
-      #   user: root
-      #   volumes:
-      #     - fleet:/usr/share/elastic-agent
-      #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  # ----------------------------------------------
+  fleet:
+    container_name: Fleet
+    restart: always
+    build:
+      context: ./fleet
+      dockerfile: Dockerfile
+    ports:
+      - 8220:8220
+      - 8200:8200
+    depends_on:
+      - elasticsearch
+      - kibana
+    environment:
+      FLEET_SERVER_ENABLE: 1
+      FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
+      FLEET_SERVER_SERVICE_TOKEN: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2NTI0NzkxMjA1NTM6cW9qZktQY2hUUDJMOG1BNUJlQzAwUQ
+      FLEET_SERVER_INSECURE_HTTP: 1
+      FLEET_SERVER_POLICY_NAME: fleet-server-policy
+      FLEET_INSECURE: 1
+    user: root
+    volumes:
+      - fleet:/usr/share/elastic-agent
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       # ----------------------------------------------
   filebeat:
+    container_name: Filebeat
     # https://www.elastic.co/guide/en/apm/guide/8.1/log-correlation.html#_enable_log_correlation
     # https://www.elastic.co/guide/en/beats/filebeat/8.1/configuring-ingest-node.html
     # https://www.elastic.co/guide/en/beats/filebeat/8.1/filebeat-module-logstash.html
@@ -111,6 +124,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - kibana
+      - elasticsearch
+      - fleet
     command: --strict.perms=false
       # --strict.perms=false -> ignore ownership of files, as we run as root
       # - --pipeline # run the setup command with the --pipelines option specified
@@ -128,12 +143,15 @@ services:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - KIBANA_HOST=http://kibana:5601
       - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=WEct71W1PI1ufyVTd7NH
-  # ----------------------------------------------
+      - ELASTICSEARCH_PASSWORD=GITVBLBXAWCsB3WxN8s7
+      # ----------------------------------------------
   logstash:
+    container_name: Logstash
     depends_on:
       - elasticsearch
       - kibana
+      - fleet
+      - filebeat
     build:
       context: ./logstash
       dockerfile: Dockerfile
@@ -144,36 +162,38 @@ services:
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     environment:
       ELASTIC_USERNAME: elastic
-      ELASTIC_PASSWORD: WEct71W1PI1ufyVTd7NH
+      ELASTIC_PASSWORD: GITVBLBXAWCsB3WxN8s7
       ELASTICSEARCH_HOST_PORT: http://elasticsearch:9200
     ports:
       - "5044:5044"
       - "9600:9600"
-  # ----------------------------------------------
-  #### MONITORING STACK
-  # grafana:
-  #   image: grafana/grafana
-  #   volumes:
-  #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
-  #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
-  #     ##  configure dashboard providers (import dashboards)
-  #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
-  #     ## copy over dashboard config
-  #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
-  #   # build:
-  #   #   context: ./grafana
-  #   #   dockerfile: Dockerfile
-  #   # volumes:
-  #   ports:
-  #     - 8080:3000
-  # ----------------------------------------------
-  # prometheus:
-  #   image: prom/prometheus
-  #   # build:
-  #   #   context: ./prometheus
-  #   #   dockerfile: Dockerfile
-  #   ports:
-  #       - 9090:9090
-  #   volumes:
-  #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml
-  # ----------------------------------------------
+      # ----------------------------------------------
+      #### MONITORING STACK
+      # grafana:
+      #   container_name: Grafana
+      #   image: grafana/grafana
+      #   volumes:
+      #     # - ./grafana/mounts/datasources/sample.yaml:/etc/grafana/provisioning/datasources/sample.yaml
+      #     - ./grafana/mounts/datasources/prometheus_datasource.yaml/:/etc/grafana/provisioning/datasources/prometheus_datasource.yaml
+      #     ##  configure dashboard providers (import dashboards)
+      #     - ./grafana/mounts/dashboards/dashboard_provider.yml/:/etc/grafana/provisioning/dashboards/dashboard_provider.yml
+      #     ## copy over dashboard config
+      #     - ./grafana/mounts/dashboards/server/application_server.json/:/etc/grafana/provisioning/dashboards/server/application_server.json
+      #   # build:
+      #   #   context: ./grafana
+      #   #   dockerfile: Dockerfile
+      #   # volumes:
+      #   ports:
+      #     - 8080:3000
+      # ----------------------------------------------
+      # prometheus:
+      #   container_name: Prometheus
+      #   image: prom/prometheus
+      #   # build:
+      #   #   context: ./prometheus
+      #   #   dockerfile: Dockerfile
+      #   ports:
+      #       - 9090:9090
+      #   volumes:
+      #     - ./prometheus/prom.yml:/etc/prometheus/prometheus.yml
+      # ----------------------------------------------

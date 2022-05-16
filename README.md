@@ -12,10 +12,11 @@ Repository holding demo about DevOps tools, such as ELK-stack, RUM, Grafana, Pro
 5. then we can start up kibana as well
 6. then we need to configure fleet server
    1. management > fleet
-   2. skip step 1 and 2
-   3. step 3 use quick 
-   4. step 4 http://fleet:8220
-   5. step 5 generate service token
+   2. step 1  (create default value)
+   3. skip 2
+   4. step 3 use quick 
+   5. step 4 http://fleet:8220
+   6. step 5 generate service token
 7. Now we can update the fleet container to use the service token created in step above (6.5)
 8.  start the fleet / agent container
 9.  wait for kibana dashboard to update with connected to fleet server
@@ -27,26 +28,26 @@ Repository holding demo about DevOps tools, such as ELK-stack, RUM, Grafana, Pro
 13. Next we need to set up Kibana APM
 https://www.elastic.co/guide/en/apm/guide/current/apm-quick-start.html
 
-14. Next add APM integration to the policy we want it to use (Default Fleet policy in this example)
-    1.  Just go through and set host fleet:8200 and url http://fleet:8200
-    2.  Question: do we need to have a separate apm server ? - NO we do not
-    3.  then I'll try to send apm metrics to fleet instance instead. did work, just remember to open port 8200:8200
-    4.  Now the applications with language-apm-agents can use http://fleet:8200 to send metrics
+    1.  Next add APM integration to the policy we want it to use (Default Fleet policy in this example)
+        1.  Just go through and set host fleet:8200 and url http://fleet:8200
+        2.  Question: do we need to have a separate apm server ? - NO we do not
+        3.  then I'll try to send apm metrics to fleet instance instead. did work, just remember to open port 8200:8200
+        4.  Now the applications with language-apm-agents can use http://fleet:8200 to send metrics
 
-15. instrument applications to send data to fleet:8200
+1.  instrument applications to send data to fleet:8200
     1.  remember to fix CORS and add additional headers for distributed tracing for rum
 
-16. Log correlation
+2.  Log correlation
     1.  add morgan, and create the correct log format including apm trace ids for log correlation
 
-17.  Set up filebeat to collect logs from docker containers
+3.   Set up filebeat to collect logs from docker containers
 
 >First filebeat to retrive logs, then send them to logstash for parsing, then logstash sends them to elasticsearch ingest
 >pipeline that we need to set up, before elastic ingest logs into wanted index
 
 >NB: remember to update filebeat.yml and docker-compose.yml to have updated username and password for elastic account
 
-18.  Set up logstash so that filebeat can send to logstash, which sends them to elasticsearch
+1.   Set up logstash so that filebeat can send to logstash, which sends them to elasticsearch
     1.  https://www.elastic.co/guide/en/logstash/current/ls-security.html 
     We also need to create a few `new` `roles` and `users` to allow logstash to send data to elasticsearch. `For this we need elasticsearch and kibana to be running`
 
@@ -64,10 +65,19 @@ kibana > stack management > roles
 follow: https://www.elastic.co/guide/en/logstash/current/ls-security.html
 
 do the logstash_internal user and role, and then edit the user and give role superuser just to get things moving along. This is a demo, so don't need to be super secure.
+Also: Edit the logstash-writer role, and assign;
+cluster privilages: all
+index privilages: all
+add indicies: "*": all to the logstash-* indicies
+create a new indicies "*" with "all" privilage
+
 Then go to observability, stream, settings, add logstash-* as index
+add container.name as a field as well. This should help us validate that we are actually getting logs from logstash into elasticsearch and visualize them in Kibana.
 
 Now we are ok to start up logstash and filebeat
 the logs should be found under observability > stream 
+
+Next step would be to add ingest-pipeline with grok filter to add trace id to logs
 
 
 
