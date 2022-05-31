@@ -8,8 +8,7 @@ import { numberOfRequestCounter } from "./middleware/prometheus/counters";
 import { requestDuration } from "./middleware/prometheus/histogram";
 import prometheus from "./middleware/prometheus/prometheus";
 import morgan from "morgan";
-import { cursorTo } from "readline";
-import apm from "elastic-apm-node";
+
 
 
 const app = express();

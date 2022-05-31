@@ -11,7 +11,7 @@ import { waitFor } from "./utils/waitFor";
 import axios from "axios";
 import morgan from "morgan";
 import Logger from "./utils/logger";
-import { logger } from "elastic-apm-node";
+
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -100,7 +100,7 @@ appRouter.get('/delay/:sec', async (req, res) => {
     try {
         Logger.info('Waiting for...');
         await waitFor(Number(sec) * ms_unit);
-        Logger.info('Done waiting returning 200');
+        Logger.info(`Done waiting for ${Number(sec) * ms_unit}ms; returning 200`);
         Logger.info("<server 1>: returning /delay:sec")
         res.sendStatus(200);
     }
@@ -149,7 +149,7 @@ appRouter.get('/data-error', async (req, res) => {
                 msg: 'Backend_2 Failed, so this endpnt returns error, and is marked as faulty'
             }
         },
-            () => res.sendStatus(200)
+            () => res.sendStatus(207) // multi-status
         )
 
     }
