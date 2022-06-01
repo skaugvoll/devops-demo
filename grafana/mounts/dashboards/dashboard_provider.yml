@@ -1,11 +1,11 @@
 apiVersion: 1
 
 providers:
-- name: dashboards
-  type: file
-  updateIntervalSeconds: 10
-  allowUiUpdates: true
-  disableDeletion: true
-  options:
-    path: /etc/grafana/provisioning/dashboards
-    foldersFromFilesStructure: true
+  - name: dashboards
+    type: file
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    disableDeletion: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: true

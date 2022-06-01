@@ -4,7 +4,7 @@ const agent = apmAgentStart();
 
 import express from "express";
 import cors from "cors";
-import { numberOfRequestCounter } from "./middleware/prometheus/counters";
+import { numberOfFailedRequestCounter, numberOfRequestCounter } from "./middleware/prometheus/counters";
 import { requestDuration } from "./middleware/prometheus/histogram";
 import prometheus from "./middleware/prometheus/prometheus";
 import morgan from "morgan";
@@ -41,7 +41,7 @@ appRouter.use(prometheus)
 
 // count all incomming requests, before handing of to target route
 appRouter.all('*', async (req, res, next) => {
-    // increment number of requests metric   
+    // increment number of requests metric
     numberOfRequestCounter.inc();
     const startOperation = new Date();
 
@@ -51,8 +51,10 @@ appRouter.all('*', async (req, res, next) => {
         // observe route timeing
         const statusLabel = res.statusCode;
         const methodLabel = req.method
-        console.log('observing request duration: ', endOperation);
         requestDuration.labels(`${statusLabel}`, `${methodLabel}`).observe(endOperation)
+        if (res.statusCode >= 400) {
+            numberOfFailedRequestCounter.labels(String(res.statusCode)).inc()
+        }
     })
     // execute target/route handler
     next();
@@ -110,7 +112,7 @@ appRouter.get('/data-error', (req, res) => {
         res.send(result);
     } catch (e) {
         agent.captureError(e)
-        res.sendStatus(500);
+        return res.status(500).send("Could not execute summation");
     }
     // return result;
     // console.error("<Server 2>, this messages should appear, as this endpoint failes every time!")

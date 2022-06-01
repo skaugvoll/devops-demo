@@ -115,6 +115,11 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
 
+"@types/os-utils@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@types/os-utils/-/os-utils-0.0.1.tgz#f1ec7830c60be563d6e9566a0ae3b23ea5497493"
+  integrity sha512-r5a1I4xr8e25GFiLdpHV+jHUawtbmtuCQHR1P3SH/Y1gmRy0KLjBVGe5uUkODU/6GntoGPhOu05jv+sBdAVpog==
+
 "@types/qs@*":
   version "6.9.7"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.7.tgz#63bb7d067db107cc1e457c303bc25d511febf6cb"
@@ -1590,6 +1595,11 @@ original-url@^1.2.3:
   integrity sha512-BYm+pKYLtS4mVe/mgT3YKGtWV5HzN/XKiaIu1aK4rsxyjuHeTW9N+xVBEpJcY1onB3nccfH0RbzUEoimMqFUHQ==
   dependencies:
     forwarded-parse "^2.1.0"
+
+os-utils@^0.0.14:
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/os-utils/-/os-utils-0.0.14.tgz#29e511697b1982b8c627722175fe39797ef64156"
+  integrity sha512-ajB8csaHLBvJOYsHJkp8YdO2FvlBbf/ZxaYQwXXRDyQ84UoE+uTuLXxqd0shekXMX6Qr/pt/DDyLMRAMsgfWzg==
 
 p-cancelable@^1.0.0:
   version "1.1.0"

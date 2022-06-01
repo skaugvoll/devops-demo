@@ -4,13 +4,14 @@ const agent = apmAgentStart();
 
 import express from "express";
 import cors from "cors";
-import { numberOfRequestCounter } from "./middleware/prometheus/counters";
+import { numberOfFailedRequestCounter, numberOfRequestCounter } from "./middleware/prometheus/counters";
 import { requestDuration } from "./middleware/prometheus/histogram";
 import prometheus from "./middleware/prometheus/prometheus";
 import { waitFor } from "./utils/waitFor";
 import axios from "axios";
 import morgan from "morgan";
 import Logger from "./utils/logger";
+
 
 
 const app = express();
@@ -65,10 +66,15 @@ appRouter.all('*', async (req, res, next) => {
     // add afterware on all requests
     res.on('finish', () => {
         const endOperation = new Date().getSeconds() - startOperation.getSeconds();
-        // observe route timeing
+        Logger.info("Request latency: " + endOperation)
+        // observe route info
         const statusLabel = res.statusCode;
         const methodLabel = req.method
+        Logger.info("Should hit requestDuration");
         requestDuration.labels(`${statusLabel}`, `${methodLabel}`).observe(endOperation)
+        if (res.statusCode >= 400) {
+            numberOfFailedRequestCounter.labels(String(res.statusCode)).inc()
+        }
     })
     // execute target/route handler
     next();
@@ -110,6 +116,18 @@ appRouter.get('/delay/:sec', async (req, res) => {
     }
 })
 
+appRouter.get("/block/:sec", (req, res) => {
+    const { sec } = req.params;
+    const end = Date.now() + (Number(sec) * 1000);
+    Logger.info(`Blocking for ${Number(sec) * 1000}ms`);
+
+    while (Date.now() < end) {
+    }
+    Logger.info(`Done Blocking returning 200`);
+    res.sendStatus(200);
+
+});
+
 appRouter.get('/data', async (req, res) => {
     Logger.info("Server 1 <data>: hey there");
     const apmAgent = getAgent();
@@ -140,7 +158,7 @@ appRouter.get('/data-error', async (req, res) => {
         // res.send(d);
         return r;
     } catch (e) {
-        Logger.warn("<server 1> /data-error catch clause because backendtwo failed, as expected")
+        Logger.warn(`<server 1> /data-error catch clause because backendtwo failed, as expected. \nError;\n ${JSON.stringify(e, null, 2)}`)
         agent.captureError(e, {
             custom: {
                 type: 'request',

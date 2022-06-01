@@ -4,7 +4,7 @@
 I would say that there are four-five pillars of monitoring any server-application
 
 1. Latency (Request duration)
-    - split into 2xx responses and so on 
+
 2. Saturation (basically, how much of resource X is being used, and how much is available for consumption
     a. memory saturation
         - Using close to and sometimes 100 % memory is not that bad, it means we are storing as much as possible in memory for quick access, but then we need to know that we are still able to load in and out of memory the less frequient requestes resocures.
