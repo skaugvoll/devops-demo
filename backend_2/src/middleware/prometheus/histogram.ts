@@ -14,7 +14,7 @@ const MetricHistgram = <L extends string>(config: Prometheus.HistogramConfigurat
 
 type RequestDurationLabels = 'status' | 'method';
 export const requestDuration = MetricHistgram<RequestDurationLabels>({
-    name: 'requests_duration_s_histogram',
+    name: 'requests_duration_histogram',
     help: '<HISTOGRAM>: observe request execution duration, Seconds',
     buckets: Prometheus.exponentialBuckets(0.1, 2, 10), // # [0.1,0.2,0.4,0.8,1.6,3.2,6.4,12.8,25.6,51.2]
     // route as label is a bad thing, as it is not a finite number of values

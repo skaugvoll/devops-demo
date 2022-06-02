@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -107,33 +107,9 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(backend_count_failed_requests_total[5m]) * vector(0)",
-          "hide": true,
-          "legendFormat": "{{job}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "rate(backend_two_count_failed_requests_total[5m])",
-          "hide": true,
-          "legendFormat": "{{job}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
           "exemplar": false,
           "expr": "(sum(increase(backend_requests_duration_histogram_bucket{status=~\"[4-9]{1}[0-9]{2}\"}[2m])) by(job)\n/\nsum(increase(backend_requests_duration_histogram_count{status=~\"[4-9]{1}[0-9]{2}\"}[2m])) by(job))",
-          "hide": false,
+          "hide": true,
           "instant": false,
           "legendFormat": "{{job}}",
           "range": true,
@@ -152,6 +128,18 @@
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "  (sum(rate(backend_requests_duration_histogram_bucket{le=\"2\"}[5m])) by (job)\n/\n  sum(rate(backend_requests_duration_histogram_bucket[5m])) by (job) ) * 60",
+          "hide": false,
+          "legendFormat": "{{job}}",
+          "range": true,
+          "refId": "A"
         }
       ],
       "title": "Service Vitality",
@@ -324,7 +312,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "reqps"
         },
         "overrides": []
       },
@@ -353,7 +342,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(backend_count_failed_requests_total[5m]) or vector(0)",
+          "expr": "rate(backend_count_failed_requests_total[5m])",
           "legendFormat": "{{job}}::{{status}}",
           "range": true,
           "refId": "A"
@@ -364,7 +353,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "rate(backend_two_count_failed_requests_total[5m]) or vector(0)",
+          "expr": "rate(backend_two_count_failed_requests_total[5m])",
           "hide": false,
           "legendFormat": "{{job}}::{{status}}",
           "range": true,
@@ -850,6 +839,6 @@
   "timezone": "",
   "title": "DevOpsDemo Metric Pillars",
   "uid": "iJdcQ1r7k",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }

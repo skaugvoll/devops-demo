@@ -158,7 +158,7 @@ appRouter.get('/data-error', async (req, res) => {
         // res.send(d);
         return r;
     } catch (e) {
-        Logger.warn(`<server 1> /data-error catch clause because backendtwo failed, as expected. \nError;\n ${JSON.stringify(e, null, 2)}`)
+        Logger.error(`<server 1> /data-error catch clause because backendtwo failed, as expected. `)
         agent.captureError(e, {
             custom: {
                 type: 'request',
